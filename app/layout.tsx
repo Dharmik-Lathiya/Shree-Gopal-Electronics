@@ -24,6 +24,9 @@ export const metadata: Metadata = {
     description: "Quality electronics and appliances for modern homes",
     type: "website",
   },
+  verification: {
+    google: 'gqiz9wgVSaaX2rEB4UVkQZ6T2zPNG1c5Z2NDaykCnCo',
+  },
 };
 
 export default function RootLayout({
