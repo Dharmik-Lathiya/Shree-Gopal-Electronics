@@ -1,391 +1,114 @@
-'use client'
-
-import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X, Phone, Mail, MapPin, Facebook, Instagram, Twitter, ChevronRight, Zap, Shield, Clock, Award } from 'lucide-react';
+import Navbar from "@/components/Navbar";
+import Hero from "@/components/Hero";
+import Section from "@/components/Section";
+import Footer from "@/components/Footer";
+import Button from "@/components/ui/Button";
+import { ArrowRight, ShieldCheck, Truck, Wrench, Smartphone, Tv, Speaker, Fan } from "lucide-react";
 
 export default function Home() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState('home');
-  const heroRef = useRef(null);
-  const aboutRef = useRef(null);
-  const servicesRef = useRef(null);
-  const productsRef = useRef(null);
-  
-  const contactRef = useRef(null);
-
-  useEffect(() => {
-    const observerOptions = {
-      threshold: 0.3,
-      rootMargin: '-100px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          setActiveSection(entry.target.id);
-        }
-      });
-    }, observerOptions);
-
-    [heroRef, aboutRef, servicesRef, productsRef, contactRef].forEach(ref => {
-      if (ref.current) observer.observe(ref.current);
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  const scrollToSection = (section) => {
-    const element = document.getElementById(section);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setIsMenuOpen(false);
-    }
-  };
-
-  const products = [
-    { name: 'LED TVs', image: '📺', desc: 'Smart & Ultra HD' },
-    { name: 'Refrigerators', image: '❄️', desc: 'Energy Efficient' },
-    { name: 'Washing Machines', image: '🌀', desc: 'Front & Top Load' },
-    { name: 'Air Conditioners', image: '❄️', desc: 'Inverter Technology' },
-    { name: 'Microwave Ovens', image: '🔥', desc: 'Convection & Grill' },
-    { name: 'Water Purifiers', image: '💧', desc: 'RO & UV Technology' },
-  ];
-
-  const services = [
-    { icon: <Zap className="w-8 h-8" />, title: 'Installation', desc: 'Professional setup for all appliances' },
-    { icon: <Shield className="w-8 h-8" />, title: 'Warranty', desc: 'Extended warranty on all products' },
-    { icon: <Clock className="w-8 h-8" />, title: '24/7 Support', desc: 'Round the clock customer service' },
-    { icon: <Award className="w-8 h-8" />, title: 'Quality Assured', desc: 'Only authorized products' },
-  ];
   return (
-    <div className="bg-gradient-to-br from-orange-50 via-white to-amber-50 min-h-screen font-sans">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md shadow-md z-50 transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            <div className="flex items-center space-x-3">
-              <div className="bg-gradient-to-br from-orange-500 to-amber-600 p-3 rounded-xl shadow-lg">
-                <Zap className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
-                  Jay Gopal Electronics
-                </h1>
-                <p className="text-xs text-gray-600">Your Trusted Electronics Partner</p>
-              </div>
-            </div>
+    <main className="min-h-screen">
+      <Navbar />
+      
+      <Hero />
 
-            {/* Desktop Menu */}
-            <div className="hidden md:flex space-x-8">
-              {['home', 'about', 'services', 'products', 'contact'].map((section) => (
-                <button
-                  key={section}
-                  onClick={() => scrollToSection(section)}
-                  className={`text-sm font-medium transition-all duration-300 ${
-                    activeSection === section
-                      ? 'text-orange-600 border-b-2 border-orange-600'
-                      : 'text-gray-700 hover:text-orange-600'
-                  }`}
-                >
-                  {section.charAt(0).toUpperCase() + section.slice(1)}
-                </button>
-              ))}
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-lg hover:bg-orange-50 transition-colors"
-            >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
+      {/* Featured Categories */}
+      <Section className="bg-[#0f0f0f]">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-5xl font-bold font-display mb-4">Premium Collections</h2>
+          <p className="text-gray-400 max-w-2xl mx-auto">
+            Browse our wide range of top-tier electronics from the world's best brands.
+          </p>
         </div>
-
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-white border-t border-gray-100 shadow-lg">
-            <div className="px-4 py-4 space-y-3">
-              {['home', 'about', 'services', 'products', 'contact'].map((section) => (
-                <button
-                  key={section}
-                  onClick={() => scrollToSection(section)}
-                  className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-all"
-                >
-                  {section.charAt(0).toUpperCase() + section.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </nav>
-
-      {/* Hero Section */}
-      <section id="home" ref={heroRef} className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6 animate-fade-in">
-              <div className="inline-block bg-orange-100 text-orange-600 px-4 py-2 rounded-full text-sm font-medium">
-                ⚡ Trusted Since 1995
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            { title: "Smart TV", icon: Tv, desc: "4K & 8K OLED Displays" },
+            { title: "Home Audio", icon: Speaker, desc: "Immersive Sound Systems" },
+            { title: "Smart Home", icon: Smartphone, desc: "Connected Living" },
+            { title: "Appliances", icon: Fan, desc: "Premium Home Comfort" }
+          ].map((item, i) => (
+            <div key={i} className="glass-card p-8 rounded-2xl group hover:bg-white/5 cursor-pointer">
+              <div className="w-14 h-14 bg-blue-900/30 rounded-xl flex items-center justify-center text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-all mb-6">
+                <item.icon size={28} />
               </div>
-              <h2 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
-                Your Home
-                <span className="block bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
-                  Deserves the Best
-                </span>
-              </h2>
-              <p className="text-xl text-gray-600 leading-relaxed">
-                Premium electronics and appliances for modern living. Experience quality, reliability, and innovation at Jay Gopal Electronics.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <button
-                  onClick={() => scrollToSection('products')}
-                  className="bg-gradient-to-r from-orange-600 to-amber-600 text-white px-8 py-4 rounded-xl font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-300 flex items-center space-x-2"
-                >
-                  <span>Explore Products</span>
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => scrollToSection('contact')}
-                  className="border-2 border-orange-600 text-orange-600 px-8 py-4 rounded-xl font-semibold hover:bg-orange-50 transition-all duration-300"
-                >
-                  Contact Us
-                </button>
+              <h3 className="text-xl font-bold mb-2 group-hover:text-blue-400 transition-colors">{item.title}</h3>
+              <p className="text-gray-400 text-sm mb-6">{item.desc}</p>
+              <div className="flex items-center gap-2 text-blue-400 text-sm font-medium group-hover:gap-3 transition-all">
+                Box Open <ArrowRight size={16} />
               </div>
             </div>
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-200 to-amber-200 rounded-3xl transform rotate-6 opacity-20"></div>
-              <div className="relative bg-gradient-to-br from-orange-100 to-amber-100 rounded-3xl p-8 shadow-2xl">
-                <div className="grid grid-cols-2 gap-6">
-                  {['📺', '❄️', '🌀', '💧'].map((emoji, idx) => (
-                    <div
-                      key={idx}
-                      className="bg-white rounded-2xl p-8 flex items-center justify-center text-6xl hover:scale-110 transition-transform duration-300 shadow-lg"
-                      style={{ animationDelay: `${idx * 0.1}s` }}
-                    >
-                      {emoji}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
-      </section>
+      </Section>
 
-      {/* About Section */}
-      <section id="about" ref={aboutRef} className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h3 className="text-4xl font-bold text-gray-900 mb-4">About Jay Gopal Electronics</h3>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Serving the community with excellence for over 25 years
+      {/* Why Choose Us */}
+      <Section>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="space-y-8">
+            <h2 className="text-3xl md:text-5xl font-bold font-display leading-tight">
+              Why Choice <br />
+              <span className="text-gradient">Jay Gopal Electronics?</span>
+            </h2>
+            <p className="text-gray-400 text-lg leading-relaxed">
+              We don't just sell electronics; we provide a complete lifestyle upgrade. With over 15 years of experience, we guarantee the best prices, authentic products, and unmatched after-sales service.
             </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-              <div className="bg-orange-600 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
-                <Award className="w-8 h-8 text-white" />
-              </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-4">Our Legacy</h4>
-              <p className="text-gray-600">
-                Established in 1995, we've been the trusted name in electronics and appliances, serving thousands of satisfied customers.
-              </p>
+            
+            <div className="space-y-6">
+              {[
+                { icon: ShieldCheck, title: "100% Authentic Products", desc: "Direct partnerships with global brands." },
+                { icon: Wrench, title: "Expert Installation", desc: "Certified technicians for perfect setup." },
+                { icon: Truck, title: "Fast Delivery", desc: "Safe and secure shipping across Gujarat." }
+              ].map((feature, i) => (
+                <div key={i} className="flex gap-4">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500">
+                    <feature.icon size={24} />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold mb-1">{feature.title}</h4>
+                    <p className="text-gray-400 text-sm">{feature.desc}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-              <div className="bg-orange-600 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
-                <Shield className="w-8 h-8 text-white" />
-              </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-4">Our Promise</h4>
-              <p className="text-gray-600">
-                We guarantee authentic products, competitive prices, and exceptional after-sales service for complete peace of mind.
-              </p>
-            </div>
-            <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-              <div className="bg-orange-600 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
-                <Zap className="w-8 h-8 text-white" />
-              </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-4">Our Vision</h4>
-              <p className="text-gray-600">
-                To be the leading electronics retailer by delivering innovative solutions and unmatched customer satisfaction.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Services Section */}
-      <section id="services" ref={servicesRef} className="py-20 bg-gradient-to-br from-orange-50 to-amber-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h3 className="text-4xl font-bold text-gray-900 mb-4">Our Services</h3>
-            <p className="text-xl text-gray-600">Complete solutions for all your electronic needs</p>
+            <Button href="/about" className="mt-4">Learn More About Us</Button>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {services.map((service, idx) => (
-              <div
-                key={idx}
-                className="bg-white rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 group"
-              >
-                <div className="bg-gradient-to-br from-orange-600 to-amber-600 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform text-white">
-                  {service.icon}
-                </div>
-                <h4 className="text-xl font-bold text-gray-900 mb-3">{service.title}</h4>
-                <p className="text-gray-600">{service.desc}</p>
-              </div>
-            ))}
+          
+          <div className="relative">
+            <div className="aspect-square rounded-2xl bg-gradient-to-br from-gray-800 to-black border border-white/10 relative overflow-hidden glass-card">
+              {/* Abstract decorative elements */}
+              <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550009158-9ebf69173e03?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80')] bg-cover bg-center opacity-40 mix-blend-overlay" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+            </div>
           </div>
         </div>
-      </section>
+      </Section>
 
-      {/* Products Section */}
-      <section id="products" ref={productsRef} className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h3 className="text-4xl font-bold text-gray-900 mb-4">Our Product Range</h3>
-            <p className="text-xl text-gray-600">Premium electronics from leading brands</p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {products.map((product, idx) => (
-              <div
-                key={idx}
-                className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 group cursor-pointer"
-              >
-                <div className="text-6xl mb-6 group-hover:scale-110 transition-transform">{product.image}</div>
-                <h4 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h4>
-                <p className="text-gray-600 mb-4">{product.desc}</p>
-                <div className="flex items-center text-orange-600 font-semibold group-hover:gap-2 transition-all">
-                  <span>Learn More</span>
-                  <ChevronRight className="w-5 h-5" />
-                </div>
-              </div>
-            ))}
+      {/* CTA Section */}
+      <Section className="py-0">
+        <div className="bg-blue-900 rounded-3xl p-12 md:p-20 text-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900" />
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
+          
+          <div className="relative z-10 max-w-3xl mx-auto space-y-8">
+            <h2 className="text-3xl md:text-5xl font-bold font-display">Ready for an Upgrade?</h2>
+            <p className="text-blue-100 text-lg">
+              Visit our store today to experience the latest technology firsthand. Our experts are ready to assist you.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button href="/contact" variant="primary" className="bg-white text-slate-900 hover:bg-gray-100 hover:shadow-xl shadow-none">
+                <span className="text-slate-900 font-bold">Get Directions</span>
+              </Button>
+              <Button href="/products" variant="outline" className="border-blue-400/30 hover:bg-blue-800 text-white">
+                View Catalog
+              </Button>
+            </div>
           </div>
         </div>
-      </section>
+      </Section>
 
-      {/* Contact Section */}
-      <section id="contact" ref={contactRef} className="py-20 bg-gradient-to-br from-orange-600 to-amber-600">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h3 className="text-4xl font-bold text-white mb-4">Get In Touch</h3>
-            <p className="text-xl text-orange-100">Visit us or reach out for any inquiries</p>
-          </div>
-          <div className="grid md:grid-cols-2 gap-12">
-            <div className="space-y-8">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 flex items-start space-x-4 hover:bg-white/20 transition-all">
-                <div className="bg-white rounded-xl p-3">
-                  <MapPin className="w-6 h-6 text-orange-600" />
-                </div>
-                <div>
-                  <h4 className="text-white font-bold text-lg mb-2">Visit Our Store</h4>
-                  <p className="text-orange-100">123 Electronics Market, Main Road, City - 380001</p>
-                </div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 flex items-start space-x-4 hover:bg-white/20 transition-all">
-                <div className="bg-white rounded-xl p-3">
-                  <Phone className="w-6 h-6 text-orange-600" />
-                </div>
-                <div>
-                  <h4 className="text-white font-bold text-lg mb-2">Call Us</h4>
-                  <p className="text-orange-100">+91 98765 43210</p>
-                  <p className="text-orange-100">+91 98765 43211</p>
-                </div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 flex items-start space-x-4 hover:bg-white/20 transition-all">
-                <div className="bg-white rounded-xl p-3">
-                  <Mail className="w-6 h-6 text-orange-600" />
-                </div>
-                <div>
-                  <h4 className="text-white font-bold text-lg mb-2">Email Us</h4>
-                  <p className="text-orange-100 ">info@jaygopalelectronics.com</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-2xl p-8 shadow-2xl">
-              <h4 className="text-2xl font-bold text-gray-900 mb-6">Send us a Message</h4>
-              <form className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Your Name"
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-orange-600 text-slate-950 focus:outline-none transition-colors"
-                />
-                <input
-                  type="email"
-                  placeholder="Your Email"
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-orange-600 text-slate-950 focus:outline-none transition-colors"
-                />
-                <input
-                  type="tel"
-                  placeholder="Your Phone"
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-orange-600 text-slate-950 focus:outline-none transition-colors"
-                />
-                <textarea
-                  placeholder="Your Message"
-                
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-orange-600 text-slate-950 focus:outline-none transition-colors"
-                ></textarea>
-                <button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-orange-600 to-amber-600 text-white py-4 rounded-xl font-bold hover:shadow-xl transition-all duration-300"
-                >
-                  Send Message
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="bg-gradient-to-br from-orange-500 to-amber-600 p-2 rounded-lg">
-                  <Zap className="w-5 h-5 text-white" />
-                </div>
-                <h5 className="text-xl font-bold">Jay Gopal Electronics</h5>
-              </div>
-              <p className="text-gray-400 text-sm">Your trusted partner for quality electronics since 1995.</p>
-            </div>
-            <div>
-              <h5 className="font-bold mb-4">Quick Links</h5>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li><button onClick={() => scrollToSection('home')} className="hover:text-orange-500 transition-colors">Home</button></li>
-                <li><button onClick={() => scrollToSection('about')} className="hover:text-orange-500 transition-colors">About Us</button></li>
-                <li><button onClick={() => scrollToSection('products')} className="hover:text-orange-500 transition-colors">Products</button></li>
-                <li><button onClick={() => scrollToSection('contact')} className="hover:text-orange-500 transition-colors">Contact</button></li>
-              </ul>
-            </div>
-            <div>
-              <h5 className="font-bold mb-4">Business Hours</h5>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li>Mon - Sat: 10:00 AM - 9:00 PM</li>
-                <li>Sunday: 11:00 AM - 7:00 PM</li>
-              </ul>
-            </div>
-            <div>
-              <h5 className="font-bold mb-4">Follow Us</h5>
-              <div className="flex space-x-4">
-                <button className="bg-gray-800 p-3 rounded-lg hover:bg-orange-600 transition-colors">
-                  <Facebook className="w-5 h-5" />
-                </button>
-                <button className="bg-gray-800 p-3 rounded-lg hover:bg-orange-600 transition-colors">
-                  <Instagram className="w-5 h-5" />
-                </button>
-                <button className="bg-gray-800 p-3 rounded-lg hover:bg-orange-600 transition-colors">
-                  <Twitter className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
-            <p>&copy; 2025 Jay Gopal Electronics. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
-    </div>
+      <Footer />
+    </main>
   );
 }
