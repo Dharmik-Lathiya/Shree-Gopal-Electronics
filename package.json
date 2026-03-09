@@ -9,8 +9,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-<<<<<<< Updated upstream
-=======
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "firebase-admin": "^13.6.0",
@@ -20,7 +18,6 @@
     "next": "^16.1.4",
     "next-auth": "^5.0.0-beta.30",
     "nodemailer": "^8.0.1",
->>>>>>> Stashed changes
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "next": "16.0.0"
