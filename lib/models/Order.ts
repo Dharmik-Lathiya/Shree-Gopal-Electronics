@@ -139,7 +139,7 @@ OrderSchema.index({ paymentStatus: 1 });
 OrderSchema.index({ 'shippingAddress.pincode': 1 });
 
 // Pre-save hook to generate order number
-OrderSchema.pre('save', async function (next) {
+OrderSchema.pre('save', async function () {
     if (!this.orderNumber) {
         const count = await mongoose.model('Order').countDocuments();
         const date = new Date();
@@ -148,7 +148,6 @@ OrderSchema.pre('save', async function (next) {
         const orderNum = (count + 1).toString().padStart(5, '0');
         this.orderNumber = `ORD${year}${month}${orderNum}`;
     }
-    next();
 });
 
 // Method to add status update

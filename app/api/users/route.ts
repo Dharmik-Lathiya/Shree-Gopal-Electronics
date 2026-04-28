@@ -83,11 +83,12 @@ export async function POST(req: NextRequest) {
         }
 
         // Check if user already exists
+        const orConditions = [];
+        if (email) orConditions.push({ email });
+        if (phone) orConditions.push({ phone });
+
         const existingUser = await User.findOne({
-            $or: [
-                email ? { email } : null,
-                phone ? { phone } : null
-            ].filter(Boolean)
+            $or: orConditions
         });
 
         if (existingUser) {
@@ -107,7 +108,7 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json(
             user.toObject({
-                versionKey: false, transform: (doc, ret) => {
+                versionKey: false, transform: (doc: any, ret: any) => {
                     delete ret.otp;
                     delete ret.otpExpiry;
                     return ret;
