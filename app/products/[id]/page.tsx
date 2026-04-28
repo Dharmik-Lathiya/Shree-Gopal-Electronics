@@ -4,17 +4,10 @@ import connectToDatabase from "@/lib/db";
 import Product from "@/lib/models/Product";
 import { notFound } from "next/navigation";
 import { CheckCircle } from "lucide-react";
-import mongoose from "mongoose";
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   await connectToDatabase();
   const { id } = await params;
-  
-  // Validate MongoDB ObjectId format
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return notFound();
-  }
-  
   const product = await Product.findById(id);
 
   if (!product) return notFound();

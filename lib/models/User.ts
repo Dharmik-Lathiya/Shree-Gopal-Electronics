@@ -6,6 +6,7 @@ const UserSchema = new mongoose.Schema({
     phone: { type: String, unique: true, sparse: true },
     otp: { type: String },
     otpExpiry: { type: Date },
+    fcmToken: { type: String }, // For push notifications
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
 }, { timestamps: true });
 

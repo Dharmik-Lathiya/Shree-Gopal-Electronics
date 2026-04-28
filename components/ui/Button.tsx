@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils'; // We'll need to create this util or just use template literals if simple
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  variant?: 'primary' | 'outline' | 'ghost';
   href?: string;
   size?: 'sm' | 'md' | 'lg';
   children: React.ReactNode;
@@ -24,7 +24,6 @@ export default function Button({
   
   const variants = {
     primary: "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-900/20 hover:shadow-blue-900/40",
-    secondary: "bg-gray-600 hover:bg-gray-700 text-white shadow-lg shadow-gray-900/20 hover:shadow-gray-900/40",
     outline: "border border-white/10 bg-white/5 hover:bg-white/10 text-white hover:border-white/20 backdrop-blur-sm",
     ghost: "text-gray-400 hover:text-white hover:bg-white/5",
   };

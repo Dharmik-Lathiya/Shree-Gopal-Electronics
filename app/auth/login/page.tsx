@@ -8,22 +8,17 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 export default function LoginPage() {
-  const [step, setStep] = useState<'email' | 'otp'>('email');
-  const [email, setEmail] = useState('');
+  const [step, setStep] = useState<'phone' | 'otp'>('phone');
+  const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const isValidEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!isValidEmail(email)) {
-      toast.error('Please enter a valid email address');
+    if (phone.length < 10) {
+      toast.error('Please enter a valid 10-digit phone number');
       return;
     }
     
@@ -32,7 +27,7 @@ export default function LoginPage() {
     const sendOtpPromise = fetch('/api/auth/send-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ phone }),
     }).then(async (response) => {
       const data = await response.json();
       
@@ -52,19 +47,19 @@ export default function LoginPage() {
     toast.promise(
       sendOtpPromise,
       {
-        loading: 'Sending OTP to your email...',
+        loading: 'Sending OTP...',
         success: (data) => {
-          if (data.devOTP) {
-            return `OTP Sent! Dev OTP: ${data.devOTP}`;
+          if (data.devOtp) {
+            return `OTP Sent! Dev OTP: ${data.devOtp}`;
           }
-          return 'OTP sent to your email! Check your inbox.';
+          return 'OTP sent to your phone!';
         },
         error: (err) => err.message || 'Failed to send OTP',
       },
       {
         success: {
           duration: 8000,
-          icon: '📧',
+          icon: '📱',
         },
         error: {
           duration: 4000,
@@ -85,7 +80,7 @@ export default function LoginPage() {
     
     try {
       const result = await signIn('credentials', {
-        email,
+        phone,
         otp,
         redirect: false,
       });
@@ -93,7 +88,7 @@ export default function LoginPage() {
       setLoading(false);
 
       if (result?.error) {
-        toast.error(result.error || 'Invalid OTP. Please try again.');
+        toast.error('Invalid OTP. Please try 123456');
       } else {
         toast.success('Login successful! Redirecting...', {
           icon: '✅',
@@ -115,68 +110,45 @@ export default function LoginPage() {
       
       <div className="flex-1 flex items-center justify-center px-6 py-32">
         <div className="w-full max-w-md glass-card p-8 rounded-2xl">
-          <div className="text-center mb-6">
-            <div className="text-5xl mb-4">🔐</div>
-            <h2 className="text-2xl font-bold font-display">
-              {step === 'email' ? 'Login / Register' : 'Verify OTP'}
-            </h2>
-            <p className="text-sm text-gray-400 mt-2">
-              {step === 'email' 
-                ? 'Enter your email to receive a one-time password' 
-                : 'Enter the 6-digit code sent to your email'}
-            </p>
-          </div>
+          <h2 className="text-2xl font-bold font-display mb-6 text-center">
+            {step === 'phone' ? 'Login / Register' : 'Verify OTP'}
+          </h2>
 
-          {step === 'email' ? (
+          {step === 'phone' ? (
             <form onSubmit={handleSendOtp} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-400">
-                  Email Address
-                </label>
+                <label className="block text-sm font-medium mb-2 text-gray-400">Phone Number</label>
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value.trim())}
-                  placeholder="your.email@example.com"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                  placeholder="Enter 10-digit phone number"
                   required
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors"
                 />
               </div>
               <button
                 type="submit"
-                disabled={loading || !isValidEmail(email)}
+                disabled={loading || phone.length < 10}
                 className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-xl font-medium transition-colors"
               >
                 {loading ? 'Sending...' : 'Send OTP'}
               </button>
-              <p className="text-xs text-center text-gray-500 mt-4">
-                We'll send a 6-digit code to your email address. The code expires in 10 minutes.
-              </p>
             </form>
           ) : (
             <form onSubmit={handleVerifyOtp} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-400">
-                  Enter OTP
-                </label>
+                <label className="block text-sm font-medium mb-2 text-gray-400">Enter OTP</label>
                 <input
                   type="text"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="000000"
+                  placeholder="Enter 6-digit OTP"
                   required
-                  autoFocus
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-center text-2xl tracking-widest focus:outline-none focus:border-blue-500 transition-colors"
                 />
                 <p className="text-xs text-gray-500 mt-2 text-center">
-                  Sent to <span className="text-blue-400">{email}</span> • 
-                  <button 
-                    type="button" 
-                    onClick={() => setStep('email')} 
-                    className="text-blue-400 hover:underline ml-1"
-                  >
-                    Change
-                  </button>
+                  Sent to {phone} • <button type="button" onClick={() => setStep('phone')} className="text-blue-400 hover:underline">Change</button>
                 </p>
               </div>
               <button
@@ -188,23 +160,11 @@ export default function LoginPage() {
               </button>
               <button
                 type="button"
-                onClick={() => { setStep('email'); setOtp(''); }}
+                onClick={() => { setStep('phone'); setOtp(''); }}
                 className="w-full py-2 text-gray-400 hover:text-white transition-colors text-sm"
               >
-                ← Back to Email
+                ← Back to Phone Number
               </button>
-              <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                <p className="text-xs text-center text-gray-400">
-                  💡 Didn't receive the code? Check your spam folder or 
-                  <button 
-                    type="button"
-                    onClick={() => { setStep('email'); handleSendOtp(new Event('submit') as any); }}
-                    className="text-blue-400 hover:underline ml-1"
-                  >
-                    resend
-                  </button>
-                </p>
-              </div>
             </form>
           )}
         </div>

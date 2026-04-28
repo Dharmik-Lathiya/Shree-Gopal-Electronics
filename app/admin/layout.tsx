@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { LayoutDashboard, ShoppingBag, FileText, Users, LogOut, Activity } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, FileText, Users, LogOut } from 'lucide-react';
 import { signOut } from '@/lib/auth'; // Ensure this works or use client-side signOut
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
@@ -28,7 +28,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                 { name: 'Products', href: '/admin/products', icon: ShoppingBag },
                 { name: 'Blogs', href: '/admin/blogs', icon: FileText },
                 { name: 'Users', href: '/admin/users', icon: Users },
-                { name: 'Activity', href: '/admin/activity', icon: Activity },
             ].map((item) => (
                 <Link 
                     key={item.name} 
