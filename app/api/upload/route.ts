@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import cloudinary from '@/lib/cloudinary';
+import path from 'path';
+import { writeFile, mkdir, unlink } from 'fs/promises';
 
 export async function POST(req: NextRequest) {
     try {
         // Check authentication
         const session = await auth();
-        if (!session?.user || !('role' in session.user) || session.user.role !== 'admin') {
+        if (!session?.user || (session.user as any).role !== 'admin') {
             return NextResponse.json(
                 { error: 'Unauthorized. Admin access required.' },
                 { status: 401 }
@@ -24,29 +25,32 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Convert file to base64
+        // Convert file to buffer
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
-        const base64 = buffer.toString('base64');
-        const dataURI = `data:${file.type};base64,${base64}`;
 
-        // Upload to Cloudinary
-        const result = await cloudinary.uploader.upload(dataURI, {
-            folder: `jay-gopal-electronics/${folder}`,
-            resource_type: 'auto',
-            transformation: [
-                { width: 1200, height: 1200, crop: 'limit' },
-                { quality: 'auto:good' },
-                { fetch_format: 'auto' }
-            ]
-        });
+        // Sanitize filename and add timestamp
+        const timestamp = Date.now();
+        const sanitizedName = file.name.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
+        const filename = `${timestamp}-${sanitizedName}`;
+        
+        // Define paths
+        const uploadDir = path.join(process.cwd(), 'public', 'uploads', folder);
+        const absolutePath = path.join(uploadDir, filename);
+        const relativePath = `/uploads/${folder}/${filename}`;
+
+        // Ensure directory exists
+        await mkdir(uploadDir, { recursive: true });
+
+        // Save file
+        await writeFile(absolutePath, buffer);
 
         return NextResponse.json({
-            url: result.secure_url,
-            publicId: result.public_id,
-            width: result.width,
-            height: result.height,
-            format: result.format
+            url: relativePath,
+            publicId: `${folder}/${filename}`, // Keep for compatibility with existing UI logic
+            width: 0,
+            height: 0,
+            format: file.type.split('/')[1]
         });
     } catch (error: any) {
         console.error('Image upload error:', error);
@@ -57,12 +61,12 @@ export async function POST(req: NextRequest) {
     }
 }
 
-// DELETE endpoint to remove images from Cloudinary
+// DELETE endpoint to remove locally stored images
 export async function DELETE(req: NextRequest) {
     try {
         // Check authentication
         const session = await auth();
-        if (!session?.user || !('role' in session.user) || session.user.role !== 'admin') {
+        if (!session?.user || (session.user as any).role !== 'admin') {
             return NextResponse.json(
                 { error: 'Unauthorized. Admin access required.' },
                 { status: 401 }
@@ -73,15 +77,17 @@ export async function DELETE(req: NextRequest) {
 
         if (!publicId) {
             return NextResponse.json(
-                { error: 'No public ID provided' },
+                { error: 'No public ID (filename) provided' },
                 { status: 400 }
             );
         }
 
-        // Delete from Cloudinary
-        await cloudinary.uploader.destroy(publicId);
+        // publicId is "folder/filename"
+        const absolutePath = path.join(process.cwd(), 'public', 'uploads', publicId);
+        
+        await unlink(absolutePath);
 
-        return NextResponse.json({ message: 'Image deleted successfully' });
+        return NextResponse.json({ message: 'Image deleted successfully from local storage' });
     } catch (error: any) {
         console.error('Image delete error:', error);
         return NextResponse.json(
