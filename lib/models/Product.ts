@@ -7,6 +7,7 @@ const ProductSchema = new mongoose.Schema({
     description: { type: String },
     specifications: { type: Map, of: String }, // Key-value pairs for technical specs
     imageUrl: { type: String },
+    price: { type: Number, default: 0 },
     isFeatured: { type: Boolean, default: false },
 }, { timestamps: true });
 

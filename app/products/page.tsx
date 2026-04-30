@@ -12,7 +12,8 @@ async function getProducts() {
     title: p.title,
     category: p.category,
     features: p.features,
-    imageUrl: p.imageUrl
+    imageUrl: p.imageUrl,
+    price: p.price
   }));
 }
 

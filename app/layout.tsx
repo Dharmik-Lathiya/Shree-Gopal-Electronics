@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import { Toaster } from 'react-hot-toast';
 import AuthProvider from '@/components/AuthProvider';
+import { CartProvider } from '@/lib/context/CartContext';
+import { WishlistProvider } from '@/lib/context/WishlistContext';
 import "./globals.css";
 
 const inter = Inter({
@@ -31,8 +33,12 @@ export default function RootLayout({
         className={`${inter.variable} ${outfit.variable} antialiased bg-[#0a0a0a] text-[#ededed] min-h-screen flex flex-col`}
       >
         <AuthProvider>
-          <Toaster position="top-right" />
-          {children}
+          <CartProvider>
+            <WishlistProvider>
+              <Toaster position="top-right" />
+              {children}
+            </WishlistProvider>
+          </CartProvider>
         </AuthProvider>
       </body>
     </html>

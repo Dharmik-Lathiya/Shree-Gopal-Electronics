@@ -1,107 +1,96 @@
+// Force rebuild
 import NextAuth, { DefaultSession } from 'next-auth';
-import { JWT } from "next-auth/jwt";
 import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
 import connectToDatabase from './db';
 import User from './models/User';
+import { nextAuthConfig } from './auth.config';
 
-declare module "next-auth" {
-    interface Session {
-        user: {
-            id: string;
-            role: string;
-            phone: string;
-        } & DefaultSession["user"]
-    }
-
-    interface User {
-        role?: string;
-        phone?: string;
-    }
-}
-
-declare module "next-auth/jwt" {
-    interface JWT {
-        id?: string;
-        role?: string;
-        phone?: string;
-    }
-}
+import bcrypt from 'bcryptjs';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+    ...nextAuthConfig,
     providers: [
+        GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        }),
         CredentialsProvider({
-            name: 'Phone OTP',
+            name: 'Credentials',
             credentials: {
-                phone: { label: 'Phone', type: 'text' },
-                otp: { label: 'OTP', type: 'text' },
+                identifier: { label: 'Username or Email', type: 'text' },
+                password: { label: 'Password', type: 'password' },
             },
             async authorize(credentials) {
-                if (!credentials?.phone || !credentials?.otp) {
-                    throw new Error('Phone and OTP are required');
+                if (!credentials?.identifier || !credentials?.password) {
+                    throw new Error('Username/Email and password are required');
                 }
 
                 await connectToDatabase();
 
-                // Find user by phone
-                const user = await User.findOne({ phone: credentials.phone });
+                // Find user by email or username
+                const user = await User.findOne({
+                    $or: [
+                        { email: credentials.identifier },
+                        { username: credentials.identifier }
+                    ]
+                });
 
                 if (!user) {
-                    throw new Error('User not found. Please request OTP first.');
+                    throw new Error('No user found with this email or username');
                 }
 
-                // Check if OTP is expired
-                if (user.otpExpiry && new Date() > new Date(user.otpExpiry)) {
-                    throw new Error('OTP has expired. Please request a new one.');
+                if (!user.password) {
+                    throw new Error('This account does not have a password set. Please sign in with Google or reset your password.');
                 }
 
-                // Verify OTP
-                if (user.otp !== credentials.otp) {
-                    throw new Error('Invalid OTP');
+                const isPasswordCorrect = await bcrypt.compare(
+                    credentials.password as string,
+                    user.password
+                );
+
+                if (!isPasswordCorrect) {
+                    throw new Error('Invalid password');
                 }
-
-                // Clear OTP after successful verification
-                user.otp = undefined;
-                user.otpExpiry = undefined;
-
-                // Set default name if not exists
-                if (!user.name) {
-                    user.name = `User ${(credentials.phone as string).slice(-4)}`;
-                }
-
-                await user.save();
 
                 return {
                     id: user._id.toString(),
                     name: user.name,
-                    phone: user.phone,
+                    email: user.email,
+                    username: user.username,
                     role: user.role,
                 };
             },
         }) as any,
     ],
     callbacks: {
-        async session({ session, token }) {
-            if (token) {
-                session.user.id = token.id as string;
-                session.user.role = token.role as string;
-                session.user.phone = token.phone as string;
+        ...nextAuthConfig.callbacks,
+        async signIn({ user, account }) {
+            if (account?.provider === 'google') {
+                await connectToDatabase();
+                const existingUser = await User.findOne({ email: user.email });
+                
+                if (!existingUser) {
+                    // Create a new user for Google sign-in if they don't exist
+                    const newUser = new User({
+                        name: user.name,
+                        email: user.email,
+                        username: user.email?.split('@')[0], // Default username
+                        role: 'user',
+                    });
+                    await newUser.save();
+                    user.id = newUser._id.toString();
+                    user.role = newUser.role;
+                    user.username = newUser.username;
+                } else {
+                    user.id = existingUser._id.toString();
+                    user.role = existingUser.role;
+                    user.username = existingUser.username;
+                }
             }
-            return session;
+            return true;
         },
-        async jwt({ token, user }) {
-            if (user) {
-                token.id = user.id;
-                token.role = user.role;
-                token.phone = user.phone;
-            }
-            return token;
-        },
-    },
-    pages: {
-        signIn: '/auth/login',
-    },
-    session: {
-        strategy: 'jwt',
     },
     secret: process.env.AUTH_SECRET,
 });
+

@@ -1,53 +1,66 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import toast from 'react-hot-toast';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Mail, Lock, User, ArrowRight } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, UserCircle } from 'lucide-react';
+import { signIn } from 'next-auth/react';
 
-export default function LoginPage() {
-  const [identifier, setIdentifier] = useState('');
-  const [password, setPassword] = useState('');
+export default function RegisterPage() {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    username: '',
+    password: '',
+  });
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!identifier || !password) {
-      toast.error('Please enter both identifier and password');
+    if (!formData.email || !formData.password || !formData.username) {
+      toast.error('Please fill in all required fields');
       return;
     }
     
     setLoading(true);
     
     try {
-      const result = await signIn('credentials', {
-        identifier,
-        password,
-        redirect: false,
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
       });
 
-      setLoading(false);
+      const data = await response.json();
 
-      if (result?.error) {
-        toast.error(result.error || 'Invalid credentials');
-      } else {
-        toast.success('Login successful! Redirecting...', {
+      if (response.ok) {
+        toast.success('Registration successful! Redirecting to login...', {
           icon: '✅',
         });
         setTimeout(() => {
-          router.push('/admin');
-          router.refresh();
-        }, 500);
+          router.push('/auth/login');
+        }, 1500);
+      } else {
+        toast.error(data.message || 'Registration failed');
+        setLoading(false);
       }
     } catch (error) {
       setLoading(false);
       toast.error('An error occurred. Please try again.');
     }
+  };
+
+  const handleGoogleSignIn = () => {
+    signIn('google', { callbackUrl: '/admin' });
   };
 
   return (
@@ -62,16 +75,35 @@ export default function LoginPage() {
         <div className="w-full max-w-md glass-card p-10 rounded-3xl border border-white/10 relative z-10 backdrop-blur-xl">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold font-display mb-3 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-              Welcome Back
+              Create Account
             </h2>
-            <p className="text-gray-400">Sign in to your account to continue</p>
+            <p className="text-gray-400">Join Shree Gopal Electronics today</p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleRegister} className="space-y-6">
             <div className="space-y-4">
               <div className="relative group">
                 <label className="block text-sm font-medium mb-2 text-gray-400 transition-colors group-focus-within:text-blue-400">
-                  Username or Email
+                  Full Name
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-blue-400 transition-colors">
+                    <UserCircle size={18} />
+                  </div>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="John Doe"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-gray-600 text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="relative group">
+                <label className="block text-sm font-medium mb-2 text-gray-400 transition-colors group-focus-within:text-blue-400">
+                  Username
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-blue-400 transition-colors">
@@ -79,9 +111,10 @@ export default function LoginPage() {
                   </div>
                   <input
                     type="text"
-                    value={identifier}
-                    onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder="name@example.com or username"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    placeholder="johndoe123"
                     required
                     className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-gray-600 text-white"
                   />
@@ -89,22 +122,38 @@ export default function LoginPage() {
               </div>
 
               <div className="relative group">
-                <div className="flex justify-between items-center mb-2">
-                  <label className="block text-sm font-medium text-gray-400 transition-colors group-focus-within:text-blue-400">
-                    Password
-                  </label>
-                  <button type="button" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
-                    Forgot password?
-                  </button>
+                <label className="block text-sm font-medium mb-2 text-gray-400 transition-colors group-focus-within:text-blue-400">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-blue-400 transition-colors">
+                    <Mail size={18} />
+                  </div>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="name@example.com"
+                    required
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-gray-600 text-white"
+                  />
                 </div>
+              </div>
+
+              <div className="relative group">
+                <label className="block text-sm font-medium mb-2 text-gray-400 transition-colors group-focus-within:text-blue-400">
+                  Password
+                </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-blue-400 transition-colors">
                     <Lock size={18} />
                   </div>
                   <input
                     type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
                     placeholder="••••••••"
                     required
                     className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-gray-600 text-white"
@@ -115,14 +164,14 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              disabled={loading || !identifier || !password}
+              disabled={loading || !formData.email || !formData.password || !formData.username}
               className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed rounded-2xl font-semibold transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 text-white"
             >
               {loading ? (
                 <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  Sign In
+                  Create Account
                   <ArrowRight size={18} />
                 </>
               )}
@@ -139,7 +188,7 @@ export default function LoginPage() {
 
             <button
               type="button"
-              onClick={() => signIn('google', { callbackUrl: '/admin' })}
+              onClick={handleGoogleSignIn}
               className="w-full py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl font-medium transition-all flex items-center justify-center gap-3 text-white"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -165,14 +214,13 @@ export default function LoginPage() {
 
             <div className="text-center mt-8">
               <p className="text-gray-500 text-sm">
-                Don't have an account?{' '}
-                <a href="/auth/register" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
-                  Register now
-                </a>
+                Already have an account?{' '}
+                <Link href="/auth/login" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
+                  Sign In
+                </Link>
               </p>
             </div>
           </form>
-
         </div>
       </div>
       <Footer />

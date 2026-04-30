@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Phone, User, LogOut } from 'lucide-react';
+import { Menu, X, Phone, User, LogOut, ShoppingCart, Heart } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
+import { useCart } from '@/lib/context/CartContext';
+import { useWishlist } from '@/lib/context/WishlistContext';
 
 const navLinks = [
   { name: 'Home', href: '/' },
@@ -19,6 +21,8 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { data: session, status } = useSession();
+  const { cartCount } = useCart();
+  const { wishlistCount } = useWishlist();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -47,46 +51,69 @@ export default function Navbar() {
 
         {/* Desktop Links */}
         <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              href={link.href}
-              className="text-sm font-medium text-gray-300 hover:text-white transition-colors relative group"
-            >
-              {link.name}
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-400 transition-all duration-300 group-hover:w-full" />
-            </Link>
-          ))}
-          
-          {status === 'loading' ? (
-            <div className="w-8 h-8 rounded-full bg-white/10 animate-pulse" />
-          ) : session ? (
-            <div className="flex items-center gap-3">
+          <div className="flex items-center gap-6 mr-4 border-r border-white/10 pr-6">
+            {navLinks.map((link) => (
               <Link
-                href="/admin"
-                className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all text-sm font-medium text-white"
+                key={link.name}
+                href={link.href}
+                className="text-sm font-medium text-gray-300 hover:text-white transition-colors relative group"
+              >
+                {link.name}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-400 transition-all duration-300 group-hover:w-full" />
+              </Link>
+            ))}
+          </div>
+          
+          <div className="flex items-center gap-5">
+            <Link href="/wishlist" className="relative p-2 text-gray-400 hover:text-white transition-colors group">
+              <Heart size={20} className="group-hover:fill-red-500 group-hover:text-red-500" />
+              {wishlistCount > 0 && (
+                <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 text-[10px] flex items-center justify-center text-white rounded-full">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
+            
+            <Link href="/cart" className="relative p-2 text-gray-400 hover:text-white transition-colors group">
+              <ShoppingCart size={20} />
+              {cartCount > 0 && (
+                <span className="absolute top-0 right-0 w-4 h-4 bg-blue-600 text-[10px] flex items-center justify-center text-white rounded-full">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+
+            {status === 'loading' ? (
+              <div className="w-8 h-8 rounded-full bg-white/10 animate-pulse" />
+            ) : session ? (
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all text-sm font-medium text-white"
+                >
+                  <User size={16} />
+                  <span>{session.user?.name || 'Profile'}</span>
+                </Link>
+                <button
+                  onClick={() => signOut()}
+                  className="p-2 text-gray-400 hover:text-white transition-colors"
+                  title="Sign Out"
+                >
+                  <LogOut size={18} />
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/auth/login"
+                className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 hover:scale-105 rounded-full transition-all text-sm font-medium text-white"
               >
                 <User size={16} />
-                <span>{session.user?.name || 'Profile'}</span>
+                <span>Login</span>
               </Link>
-              <button
-                onClick={() => signOut()}
-                className="p-2 text-gray-400 hover:text-white transition-colors"
-                title="Sign Out"
-              >
-                <LogOut size={18} />
-              </button>
-            </div>
-          ) : (
-            <Link
-              href="/auth/login"
-              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 hover:scale-105 rounded-full transition-all text-sm font-medium text-white"
-            >
-              <User size={16} />
-              <span>Login</span>
-            </Link>
-          )}
+            )}
+          </div>
         </div>
+
 
         {/* Mobile Toggle */}
         <button
